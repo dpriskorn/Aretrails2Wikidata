@@ -1,16 +1,17 @@
 [tool.poetry]
 name = "aretrails2wikidata"
 version = "0.1.0"
-description = "Code to import all hiking trails in Åre to Wikidata."
-authors = ["Your Name <your.email@example.com>"]
-license = "MIT"
+description = "Project to analyze and import all hiking trails in Åre to Wikidata."
+#authors = ["Your Name <your.email@example.com>"]
+license = "GPLv3+"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.12"
 requests = "^2.31.0"
-wikibaseintegrator = "^0.13.0"
 # shapely = "^2.0.1"
 # pandas = "^2.1.1"
+pydantic = "^2.10.1"
+wikibaseintegrator = "^0.12.10"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.4.0"

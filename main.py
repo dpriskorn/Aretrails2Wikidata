@@ -1,3 +1,4 @@
+import csv
 import json
 import logging
 from venv import logger
@@ -84,7 +85,17 @@ class TrailItem(BaseModel):
 
     @property
     def length(self):
-        return int(self.properties["trailDistanceMeter"])
+        if self.properties["trailDistanceMeter"]:
+            return int(float(self.properties["trailDistanceMeter"]))
+        else:
+            return 0
+
+    @property
+    def length_in_km(self):
+        if self.properties["trailDistanceMeter"]:
+            return round(float(self.properties["trailDistanceMeter"]) / 1000, 1)
+        else:
+            return 0
 
     @property
     def number(self):
@@ -219,6 +230,23 @@ class AreTrailsData(BaseModel):
             )
         ]
 
+    def export_trails_to_csv(self, filename: str = "trails.csv"):
+        """Export trail items to a CSV file with specified columns."""
+        with open(filename, mode="w", encoding="utf-8", newline="") as csvfile:
+            fieldnames = ["title", "activity_key", "multitrail", "length", "url"]
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+            writer.writeheader()
+            for trail in self.trails:
+                writer.writerow({
+                    "title": trail.title,
+                    "activity_key": trail.activity_key,
+                    "multitrail": trail.is_multitrail,
+                    "length": trail.length,
+                    "url": trail.url,
+                })
+        print(f"Trail items exported successfully to '{filename}'.")
+
 
 if __name__ == "__main__":
     try:
@@ -239,16 +267,17 @@ if __name__ == "__main__":
         print(
             f"number of trail items with unsupported activity: {len(atd.trails_with_unsupported_activity)}"
         )
+        atd.export_trails_to_csv()
         # first trail
         # print(repr(atd.items[0]))
-        for item in atd.trails_with_unsupported_activity:
-            print(item.title)
-            print(item.url)
-            # print(f"bicycle: {item.has_bike_activity}")
-            # print(f"hiking: {item.has_hike_activity}")
-            # print(f"riding: {item.has_riding_activity}")
-            print(item.activity_key)
-            exit()
+        # for item in atd.trails_with_unsupported_activity:
+        #     print(item.title)
+        #     print(item.url)
+        #     # print(f"bicycle: {item.has_bike_activity}")
+        #     # print(f"hiking: {item.has_hike_activity}")
+        #     # print(f"riding: {item.has_riding_activity}")
+        #     print(item.activity_key)
+        #     exit()
     except requests.exceptions.RequestException as e:
         print(f"Error fetching data: {e}")
     except Exception as e:
