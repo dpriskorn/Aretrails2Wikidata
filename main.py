@@ -30,6 +30,11 @@ class TrailItem(BaseModel):
     objectClass: str
     content: Any
     properties: Any
+    networkId: str
+
+    @property
+    def network_id(self) -> str:
+        return self.networkId
 
     @property
     def activity(self) -> Dict[str, Any]:
@@ -98,19 +103,16 @@ class TrailItem(BaseModel):
             return 0
 
     @property
-    def number(self):
-        return int(self.properties["trailNumber"])
+    def number(self) -> str:
+        return self.properties.get("trailNumber", "")
 
     @property
     def class_(self):
         return self.objectClass
 
-    def __repr__(self):
-        print(self.id)
-        print(self.class_)
-        print(self.title)
-        print(self.number)
-        print(self.url)
+    @property
+    def gpx_url(self):
+        return f"https://func-gaiaplaces-aretrails.azurewebsites.net/api/ContentItem/geo/{self.id}/gpx?networkId={self.network_id}&draft=0&code="
 
 
 class AreTrailsData(BaseModel):
@@ -233,17 +235,19 @@ class AreTrailsData(BaseModel):
     def export_trails_to_csv(self, filename: str = "trails.csv"):
         """Export trail items to a CSV file with specified columns."""
         with open(filename, mode="w", encoding="utf-8", newline="") as csvfile:
-            fieldnames = ["title", "activity_key", "multitrail", "length", "url"]
+            fieldnames = ["title", "number", "activity_key", "multitrail", "length", "url", "gpx"]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
             writer.writeheader()
             for trail in self.trails:
                 writer.writerow({
                     "title": trail.title,
+                    "number": trail.number,
                     "activity_key": trail.activity_key,
                     "multitrail": trail.is_multitrail,
                     "length": trail.length,
                     "url": trail.url,
+                    "gpx": trail.gpx_url
                 })
         print(f"Trail items exported successfully to '{filename}'.")
 
